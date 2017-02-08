@@ -163,5 +163,3 @@ if __name__ == "__main__":
     
     result = mmquery.toCSV()
     print result.encode('utf-8')
-    #print result
-    print sys.stdout.encoding
