@@ -51,6 +51,7 @@ class MoneyMeQuery:
         self.endDate = None
 
     def __monthStrToNum(self, monthStr):
+        """Transforms a string representing the month into a number in the range 1-12"""
         return {
             'jan' : 1,
             'january' : 1,
@@ -94,6 +95,13 @@ class MoneyMeQuery:
         }.get(monthStr.lower(), 0) # 0 is the default value if not found
 
     def __parseMonth(self, monthStr):
+        """Transforms a string into a month in the interval 1-12.
+
+        Input string can be a number such as "1", "02", or a month such
+        as "Jan", "January, "Ene", "Enero", etc.
+        Returns 0 if the month could not be parsed
+                1-12 if the month could be parsed (January: 1)
+        """
         month = 0
 
         # First, try to obtain a numeric month
@@ -198,7 +206,19 @@ class MoneyMeQuery:
 
         return retVal
 
+    def processName(self, tr_category, tr_name):
+        retVal = ""
+        if unicode(tr_category) == unicode(tr_name):
+            retVal = ""
+        else:
+            retVal = tr_name
+        return retVal
+
     def getResult(self):
+        """Returns list with all the selected transactions, already formatted
+
+        Each element in the list is a list [date, category, name, amount, pay_method]
+        """
         result = []
         cursor = self.dbCon.cursor()
 
@@ -215,11 +235,7 @@ class MoneyMeQuery:
             row.append(tr_category)
 
             # tr_name
-            # TODO: add a processCategory
-            if unicode(tr_category) == unicode(tr_name):
-                row.append("")
-            else:
-                row.append(tr_name)
+            row.append(self.processName(tr_category,tr_name))
 
             # tr_amount:
             row.append(self.processAmount(tr_amount))
@@ -227,8 +243,8 @@ class MoneyMeQuery:
             # tr_pay_method:
             row.append(self.processPaymentMethod(tr_pay_method))
 
+            # Current row is ready
             result.append(row)
-
 
         return result
 
