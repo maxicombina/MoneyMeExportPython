@@ -13,19 +13,27 @@ from calendar import monthrange
 import sys
 
 # Program arguments
-parser = argparse.ArgumentParser(description='Export MoneyMe transaction in a suitable format for later analysis')
-parser.add_argument('sqlite3_file',
+parser = argparse.ArgumentParser(prog='mmexport.py',
+                    description='Export MoneyMe transaction in a suitable format for later analysis',
+                    add_help=True)
+
+fileGroup = parser.add_argument_group('File', 'Backup file to process')
+fileGroup.add_argument('sqlite3_file',
                     help='The exported backup file from MoneyMe'
                     )
 
-parser.add_argument('-s', '--start',
+dateGroup = parser.add_argument_group('Date selection', 'Determine date range to process')
+dateGroup.add_argument('-s', '--start',
+                    metavar='startDate',
                     help='Start date in format "YYYY-MM-DD". If not provided, the 1st day of current month is used',
                     )
 
-parser.add_argument('-e', '--end',
+dateGroup.add_argument('-e', '--end',
+                    metavar='endDate',
                     help='End date in format "YYYY-MM-DD". If not provided, current date is used')
 
-parser.add_argument('-m', '--month',
+dateGroup.add_argument('-m', '--month',
+                    metavar='month',
                     help='Process full `month\' from current year. Accepted values are numeric,' +
                     ' or `Jan\'/`January\', or `Ene\'/`Enero\', etc; case insensitive. Takes precedence over '+
                     ' the other date options' )
