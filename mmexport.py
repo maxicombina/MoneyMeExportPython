@@ -94,7 +94,7 @@ class MoneyMeQuery:
             month = int(monthStr)
             if month < 1 or month > 12:
                 # Fallback to current month
-                month = datetime.now().strftime("%m")
+                month = datetime.now().month
         except:
             pass
 
@@ -102,9 +102,7 @@ class MoneyMeQuery:
         if  month == 0:
             month = self.__monthStrToNum(str(monthStr))
 
-        # Cast to in because "datetime.now().strftime("%m")" pads with 0, e.g. "02"
-        # and other functions (e.g. monthrange()) complain about this!
-        return int(month)
+        return month
 
     def getStartDate(self):
         if self.startDate == None:
