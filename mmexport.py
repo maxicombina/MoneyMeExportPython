@@ -25,12 +25,12 @@ fileGroup.add_argument('sqlite3_file',
 dateGroup = parser.add_argument_group('Date selection', 'Determine date range to process')
 dateGroup.add_argument('-s', '--start',
                     metavar='startDate',
-                    help='Start date in format "YYYY-MM-DD". If not provided, the 1st day of current month is used',
+                    help='Start date in format "YYYY-MM-DD". If not provided, the 1st day of last month is used',
                     )
 
 dateGroup.add_argument('-e', '--end',
                     metavar='endDate',
-                    help='End date in format "YYYY-MM-DD". If not provided, current date is used')
+                    help='End date in format "YYYY-MM-DD". If not provided, the last day of last month is used')
 
 dateGroup.add_argument('-m', '--month',
                     metavar='month',
@@ -49,6 +49,7 @@ class MoneyMeQuery:
         self.queryResult = []
         self.startDate = None
         self.endDate = None
+        self.totalAmount = 0
 
     def __monthStrToNum(self, monthStr):
         """Transforms a string representing the month into a number in the range 1-12"""
@@ -122,8 +123,12 @@ class MoneyMeQuery:
 
     def getStartDate(self):
         if self.startDate == None:
-            self.startDate = date(datetime.now().year, datetime.now().month, 01)
-
+            # Use last month if no date requested.
+            if datetime.now().month == 1:
+                self.startDate = date(datetime.now().year-1, 12, 01)
+            else:
+                self.startDate = date(datetime.now().year, datetime.now().month-1, 01)
+        
         return self.startDate
 
     def setStartDate(self, startDate):
@@ -132,7 +137,8 @@ class MoneyMeQuery:
 
     def getEndDate(self):
         if self.endDate == None:
-            self.endDate = date.today()
+            numberOfDaysInMonth = monthrange(self.getStartDate().year, self.getStartDate().month)[1]
+            self.endDate = date(self.getStartDate().year, self.getStartDate().month, numberOfDaysInMonth)
 
         return self.endDate
 
@@ -146,7 +152,7 @@ class MoneyMeQuery:
 
         # If month != 0 it means we could understand it: create appropriate strings for start and end dates.
         # Otherwise, remove start and end date (just in case user also put them in command line): we will
-        # automatically use current month for dates.
+        # automatically use last month for dates.
         if month != 0:
             endDay = monthrange(datetime.now().year, month)[1]
             self.setStartDate(date(datetime.now().year, month, 01))
@@ -161,7 +167,7 @@ class MoneyMeQuery:
         if self.queryStatement == None:
             localStartDate = str(self.getStartDate())
             localEndDate = str(self.getEndDate())
-
+            print localStartDate, "-", localEndDate
             # TODO: sanitize input
             self.queryStatement =  "SELECT m.mov_fecha, c.nombre_cat, m.mov_nombre, m. mov_cantidad, f.fp_nombre ";
             self.queryStatement += "FROM moviments m, categories c, forma_de_pago f ";
@@ -245,6 +251,9 @@ class MoneyMeQuery:
 
             # Current row is ready
             result.append(row)
+            
+            # Accumulate total amount
+            self.totalAmount += tr_amount
 
         return result
 
@@ -256,6 +265,7 @@ class MoneyMeQuery:
 
             retVal += unicode(transaction[4]) + u"\n"
 
+        print "Total: ", self.totalAmount
         return retVal
 
     def toCSV(self):
