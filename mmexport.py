@@ -125,9 +125,9 @@ class MoneyMeQuery:
         if self.startDate == None:
             # Use last month if no date requested.
             if datetime.now().month == 1:
-                self.startDate = date(datetime.now().year-1, 12, 01)
+                self.startDate = date(datetime.now().year-1, 12, 1)
             else:
-                self.startDate = date(datetime.now().year, datetime.now().month-1, 01)
+                self.startDate = date(datetime.now().year, datetime.now().month-1, 1)
         
         return self.startDate
 
@@ -155,7 +155,7 @@ class MoneyMeQuery:
         # automatically use last month for dates.
         if month != 0:
             endDay = monthrange(datetime.now().year, month)[1]
-            self.setStartDate(date(datetime.now().year, month, 01))
+            self.setStartDate(date(datetime.now().year, month, 1))
             self.setEndDate(date(datetime.now().year, month, endDay))
         else:
             # month == 0
@@ -167,7 +167,7 @@ class MoneyMeQuery:
         if self.queryStatement == None:
             localStartDate = str(self.getStartDate())
             localEndDate = str(self.getEndDate())
-            print localStartDate, "-", localEndDate
+            print (localStartDate, "-", localEndDate)
             # TODO: sanitize input
             self.queryStatement =  "SELECT m.mov_fecha, c.nombre_cat, m.mov_nombre, m. mov_cantidad, f.fp_nombre ";
             self.queryStatement += "FROM moviments m, categories c, forma_de_pago f ";
@@ -214,7 +214,7 @@ class MoneyMeQuery:
 
     def processName(self, tr_category, tr_name):
         retVal = ""
-        if unicode(tr_category) == unicode(tr_name):
+        if tr_category == tr_name:
             retVal = ""
         else:
             retVal = tr_name
@@ -261,11 +261,11 @@ class MoneyMeQuery:
         retVal = u"fecha;categoría;comentario;importe;forma pago\n";
         for transaction in self.getResult():
             for i in range(4):
-                retVal += unicode(transaction[i]) + u";"
+                retVal += transaction[i] + u";"
 
-            retVal += unicode(transaction[4]) + u"\n"
+            retVal += transaction[4] + u"\n"
 
-        print "Total: ", self.totalAmount
+        print ("Total: ", round(self.totalAmount, 2))
         return retVal
 
     def toCSV(self):
@@ -283,4 +283,5 @@ if __name__ == "__main__":
         mmquery.setEndDate(args.end)
 
     result = mmquery.toCSV()
-    print result.encode('utf-8'),
+    print (result)
+	
