@@ -197,8 +197,8 @@ class MoneyMeQuery:
         retVal = ""
         if pm == "Tickers":
             retVal = "Ti"
-        elif pm == u"Domiciliación bancaria":
-            retVal = "D"
+        elif pm == u"Transferencia":
+            retVal = "T"
         elif pm == "Efectivo":
             retVal = "E"
         elif pm == u"Tarj débito":
